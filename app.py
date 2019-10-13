@@ -56,7 +56,10 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
-    return render_template('pages/home.html')
+    return render_template('pages/home.html',
+                            new_venue_list = Venue.query.order_by(Venue.id.desc()).limit(10).all(),
+                            new_artist_list = Artist.query.order_by(Artist.id.desc()).limit(10).all()
+                          )
 
 
 #  Venues
@@ -139,7 +142,7 @@ def create_venue_submission():
     finally:
         db.session.close()
     if not error:
-        return render_template('pages/home.html')
+        return redirect(url_for('index'))
     else:
         abort(500)
 
@@ -229,6 +232,9 @@ def edit_artist(artist_id):
     return render_template('forms/edit_artist.html', form=form_with_target_artist, artist=target_artist_properties)
 
 
+
+
+
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
     # TODO: take values from the form submitted, and update existing
@@ -236,7 +242,7 @@ def edit_artist_submission(artist_id):
     update_form = ArtistForm(request.form)
     error = False
     try:
-        artist = Artist.query.filter(id=artist_id).one()
+        artist = Artist.query.filter(Artist.id==artist_id).one()
         artist.name = update_form.name.data,
         artist.genres = ','.join(update_form.genres.data),
         artist.city = update_form.city.data,
@@ -346,7 +352,7 @@ def create_artist_submission():
     finally:
         db.session.close()
     if not error:
-        return render_template('pages/home.html')
+        return redirect(url_for('index'))
     else:
         abort(500)
 
@@ -397,14 +403,14 @@ def create_show_submission():
     finally:
         db.session.close()
     if not error:
-        return render_template('pages/home.html')
+        return redirect(url_for('index'))
     else:
         abort(500)
 
     # TODO: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Show could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+    
 
 
 @app.errorhandler(404)
