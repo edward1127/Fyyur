@@ -83,8 +83,9 @@
 	const deleteBtns = document.querySelector('#delete-button');
 	deleteBtns.addEventListener("click", function (e) {
 		const deleteId = e.target.dataset['id'];
-		fetch('/venues/' + deleteId + '/delete', {method: 'DELETE'})
-		});
+		fetch('/venues/' + deleteId + '/delete', {method: 'DELETE'}).then(function(){window.location.href = "/";})
+		})
+	
 	
 
 </script>

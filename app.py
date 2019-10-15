@@ -80,14 +80,16 @@ def search_venues():
     # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-
-    search_term = request.form.get('search_term', '')
-    venues = Venue.query.filter(Venue.name.ilike("%{}%".format(search_term)))
-    response = {
-        "count": venues.count(),
-        "data": [venue.properties for venue in venues.all()]
-    }
-    return render_template('pages/search_venues.html', results=response, search_term=search_term)
+    search_terms = request.form.get('search_term', '')
+    count = 0
+    data = []
+    for search_term in search_terms:
+        venues = Venue.query.filter(Venue.name.ilike("%{}%".format(search_term)))
+        response = {
+            "count": venues.count(),
+            "data": [venue.properties for venue in venues.all()]
+        }
+    return render_template('pages/search_venues.html', results=response, search_term=search_terms)
 
 
 @app.route('/venues/<int:venue_id>')
@@ -161,12 +163,12 @@ def delete_venue(venue_id):
   error = False
   try:
       target = Venue.query.filter(Venue.id == venue_id)
+      flash("Venue {} has been deleted successfully".format(target.one().name))
       target.delete()
       db.session.commit()
-      flash("Venue" + target.one().name + "has been deleted successfully")
   except:
       error = True
-      flash("An error occurred. Venue"  + target.one().name + "could not be deleted")
+      flash("An error occurred. Venue {} could not be deleted".format(target.one().name))
       db.session.rollback()
       print(sys.exc_info())
   finally:
@@ -194,12 +196,15 @@ def search_artists():
     # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
+
     search_term = request.form.get('search_term', '')
-    artists = Artist.query.filter(
-        Artist.name.ilike("%{}%".format(search_term)))
+    filter_by_name_state_city = Artist.query().filter(
+        search_term == Artist.name.ilike("%{}%".format(search_term))|
+        search_term == Artist.state.ilike("%{}%".format(search_term))|
+        search_term == Artist.city.ilike("%{}%".format(search_term)))
     response = {
         "count": artists.count(),
-        "data": [artist.properties for artist in artists.all()]
+        "data": [artist.properties for artist in filter_by_name_state_city.all()]
     }
     return render_template('pages/search_artists.html', results=response, search_term=search_term)
 

@@ -22,6 +22,8 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
     website = db.Column(db.String(120))
+    shows = db.relationship(
+    'Show', backref=db.backref('venue',single_parent=True, cascade='all, delete-orphan'))
 
 
     @property
@@ -96,6 +98,8 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
+    shows = db.relationship(
+        'Show', backref=db.backref('artist', single_parent=True, cascade='all, delete-orphan'))
     
     @property
     def properties(self):
@@ -149,12 +153,9 @@ class Show(db.Model):
     start_time = db.Column(db.DateTime())
     venue_id = db.Column(db.Integer, db.ForeignKey(
         'Venue.id'), nullable=False)
-    venue = db.relationship(
-        'Venue', backref=db.backref('shows', cascade='all, delete-orphan'))
     artist_id = db.Column(db.Integer, db.ForeignKey(
         'Artist.id'), nullable=False)
-    artist = db.relationship(
-        'Artist', backref=db.backref('shows', cascade='all, delete-orphan'))
+    
     
     @property
     def properties(self):
